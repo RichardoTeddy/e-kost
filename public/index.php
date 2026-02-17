@@ -39,7 +39,40 @@ require rtrim($paths->systemDirectory, '\\/ ') . DIRECTORY_SEPARATOR . 'bootstra
 
 // Load environment settings from .env files into $_SERVER and $_ENV
 require_once SYSTEMPATH . 'Config/DotEnv.php';
-(new CodeIgniter\Config\DotEnv(ROOTPATH))->load();
+(function () {
+    // Map common platform env var names (underscores) to the dotted names CodeIgniter's DotEnv expects.
+    $map = [
+        'CI_ENVIRONMENT' => 'CI_ENVIRONMENT',
+        'APP_BASEURL' => 'app.baseURL',
+        'APP_BASE_URL' => 'app.baseURL',
+        'DATABASE_DEFAULT_HOSTNAME' => 'database.default.hostname',
+        'DATABASE_DEFAULT_DATABASE' => 'database.default.database',
+        'DATABASE_DEFAULT_USERNAME' => 'database.default.username',
+        'DATABASE_DEFAULT_PASSWORD' => 'database.default.password',
+        'DATABASE_DEFAULT_DBDRIVER' => 'database.default.DBDriver',
+        'DATABASE_DEFAULT_PORT' => 'database.default.port',
+        'MAILCHIMP_API_KEY' => 'MAILCHIMP_API_KEY',
+        'MAILCHIMP_LIST_ID' => 'MAILCHIMP_LIST_ID',
+    ];
+
+    foreach ($map as $from => $to) {
+        $value = getenv($from);
+        if ($value === false && isset($_ENV[$from])) {
+            $value = $_ENV[$from];
+        }
+        if ($value === false && isset($_SERVER[$from])) {
+            $value = $_SERVER[$from];
+        }
+        if ($value !== false && $value !== null && $value !== '') {
+            // set dotted env name so DotEnv and Config can read it
+            putenv("$to=$value");
+            $_ENV[$to] = $value;
+            $_SERVER[$to] = $value;
+        }
+    }
+
+    (new CodeIgniter\Config\DotEnv(ROOTPATH))->load();
+})();
 
 /*
  * ---------------------------------------------------------------
