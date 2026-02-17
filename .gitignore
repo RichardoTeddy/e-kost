@@ -1,0 +1,16 @@
+/.env
+vendor/
+node_modules/
+.idea/
+.vscode/
+/.DS_Store
+/.env.local
+/.env.*.local
+/.sass-cache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+composer.lock
+/.cache
+/.phpunit.result.cache
+.log
