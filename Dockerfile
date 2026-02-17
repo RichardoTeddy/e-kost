@@ -24,6 +24,9 @@ RUN sed -ri "s!/var/www/html!/var/www/html/public!g" /etc/apache2/sites-availabl
 # Set permissions for writable folders
 RUN mkdir -p /var/www/html/writable && chown -R www-data:www-data /var/www/html/writable
 
+# Expose a port (platform will map to this). Container will read $PORT at runtime.
 EXPOSE 8080
 
-CMD ["apache2-foreground"]
+# Use PHP built-in server and respect the platform `PORT` env var (Railway/Render)
+# Apache image is kept for available extensions, but we'll run php -S for compatibility.
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8080} -t public"]
